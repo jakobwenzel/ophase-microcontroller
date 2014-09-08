@@ -336,6 +336,17 @@ these macros are defined, the boot loader usees them.
 #   define MCUCSR   MCUSR
 #endif
 
+
+#ifndef LED_PORT
+  #define LED_PORT      B
+#endif
+
+#ifndef LED_BIT
+  #define LED_BIT      5
+#endif
+
+//static void leaveBootloader(void);
+
 /* WARNING:
  * following commands and macros may not be evaluated properly when 'USE_EXCESSIVE_ASSEMBLER"
  */
@@ -350,14 +361,42 @@ static inline void  bootLoaderInit(void)
 //         leaveBootloader();
 
     MCUCSR = 0;                     /* clear all reset flags for next time */
+
+	/*PIN_DDR(LED_PORT) = (1<< PIN(LED_PORT, LED_BIT));
+	PIN_PORT(LED_PORT) = (1<< PIN(LED_PORT, LED_BIT));*/
+
+  	PIN_DDR(LED_PORT) = (1<< PIN(LED_PORT, LED_BIT));
 }
 
 static inline void  bootLoaderExit(void)
 {
     PIN_PORT(JUMPER_PORT) = 0;		/* undo bootLoaderInit() changes */
-}
 
-#define bootLoaderCondition()		((PIN_PIN(JUMPER_PORT) & (1 << PIN(JUMPER_PORT, JUMPER_BIT))) == 0)
+	PIN_DDR(LED_PORT) = 0;
+	PIN_PORT(LED_PORT) = 0;
+}
+static long unsigned int cnt = 0;
+static int on = 0;
+static inline int bootLoaderCondition(void) {
+	return ((PIN_PIN(JUMPER_PORT) & (1 << PIN(JUMPER_PORT, JUMPER_BIT))) == 0);
+}
+//#define bootLoaderCondition()		((PIN_PIN(JUMPER_PORT) & (1 << PIN(JUMPER_PORT, JUMPER_BIT))) == 0)
+
+static inline void flashLed(void) {
+	//Flash the led
+	if (cnt)
+		cnt--;
+	else {
+		on = ~on;
+		if (on) {
+			PIN_PORT(LED_PORT) = ~PIN_PORT(LED_PORT);	
+			cnt=65535;
+		} else {
+			cnt = 1000;
+			PIN_PORT(LED_PORT) = (1<< PIN(LED_PORT, LED_BIT));	
+		}
+	}
+}
 
 #endif /* __ASSEMBLER__ */
 

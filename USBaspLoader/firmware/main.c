@@ -413,6 +413,8 @@ static uchar    replyBuffer[4];
     }
     return len;
 }
+static char flashcnt = 0;
+static unsigned int flashcnt2 = 0;
 
 #if (USE_EXCESSIVE_ASSEMBLER) && ((!HAVE_CHIP_ERASE) || (HAVE_ONDEMAND_PAGEERASE)) && (SPM_PAGESIZE <= 256) && (((BOOTLOADER_PAGEADDR>>0)&0xff) == 0)
 uchar usbFunctionWrite(uchar *data, uchar len)
@@ -698,6 +700,14 @@ asm  volatile  (
 	}
 #endif
 #endif
+
+--flashcnt2;
+if (flashcnt) {
+	flashcnt-=(flashcnt2&0x3FFF) == 0;
+}else {
+	flashcnt = (flashcnt2>>12) | 0x1;
+	PIN_PORT(LED_PORT) = (1<< PIN(LED_PORT, LED_BIT)) ^ PIN_PORT(LED_PORT);	
+}
 
 #if BOOTLOADER_CAN_EXIT
         }while (stayinloader);	/* main event loop, if BOOTLOADER_CAN_EXIT*/

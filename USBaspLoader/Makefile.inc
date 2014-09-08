@@ -6,24 +6,24 @@
 # License: GNU GPL v2 (see License.txt)
 
 F_CPU = 16000000
-DEVICE = atmega328p
+DEVICE = atmega168
 
 # where the updating firmware should be located (starting address)
 FLASHADDRESS = 0x0000
 
 # some MCU independend defines...
 #...will be extended within MCU dependend configuration below...
-DEFINES = -DCONFIG_NO__CHIP_ERASE -DCONFIG_NO__ONDEMAND_PAGEERASE
+DEFINES = -DCONFIG_NO__CHIP_ERASE -DCONFIG_NO__ONDEMAND_PAGEERASE -DCONFIG_USE__EXCESSIVE_ASSEMBLER 
 
 # some MCUs with small BLS (bootloader section) need to deactivate some
 # features in order to fit into BLS.
 # If this option is enabled, also essential features may become deactivated
 # Esp. you MUST ensure not to have watchdog initially enabled when using this!
-DANGEROUS=0
+DANGEROUS=1
 
 # PROGRAMMER contains AVRDUDE options to address your programmer
 # PROGRAMMER = -c pony-stk200
-PROGRAMMER = -c avrisp -b 9600 -P /dev/ttyACM0
+PROGRAMMER = -c avrisp -b 19200 -P /dev/ttyACM0
 
 #  since USBaspLoader supports HAVE_BLB11_SOFTW_LOCKBIT...
 LOCKOPT = -U lock:w:0x3f:m
@@ -100,7 +100,7 @@ DEFINES_2561             = #-DEMPTY
 # you may also want to UNprogram  SUT1 to get a SLOWER bootup (lfuse then would be 0x3f)
 FUSEOPT_8            = -U lfuse:w:0x1f:m -U hfuse:w:0xc0:m
 BOOTLOADER_ADDRESS_8 = 0x1800
-DEFINES_8            = -DCONFIG_USE__EXCESSIVE_ASSEMBLER -DCONFIG_NO__NEED_WATCHDOG -DCONFIG_NO__PRECISESLEEP
+DEFINES_8            = -DCONFIG_NO__NEED_WATCHDOG -DCONFIG_NO__PRECISESLEEP
 
 
 
@@ -113,7 +113,7 @@ DEFINES_32              = #-DEMPTY
 FUSEOPT_168             = $(FUSEOPT_88)
 BOOTLOADER_ADDRESS_168  = 0x3800
 ifeq ($(DANGEROUS), 1)
-DEFINES_168             = -DCONFIG_NO__FLASH_BYTE_READACCESS -DCONFIG_NO__HAVE_READ_LOCK_FUSE -DCONFIG_NO__NEED_WATCHDOG
+DEFINES_168             = -DCONFIG_NO__FLASH_BYTE_READACCESS -DCONFIG_NO__HAVE_READ_LOCK_FUSE -DCONFIG_NO__NEED_WATCHDOG -DCONFIG_NO__BOOTLOADER_CAN_EXIT
 else
 DEFINES_168             = -DCONFIG_NO__FLASH_BYTE_READACCESS -DCONFIG_NO__HAVE_READ_LOCK_FUSE -DCONFIG_NO__BOOTLOADER_CAN_EXIT
 endif
@@ -315,7 +315,7 @@ AVRPATH = $(AVR8TOOLCHAINBINDIR)
 AVRDUDE = $(AVRDUDEBINDIR)avrdude $(PROGRAMMER) -p $(DEVICE)
 
 ECHO=@echo
-GCC=@gcc
+GCC=@gcc 
 MAKE=@make
 RM=@rm -f
 
